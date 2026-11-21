@@ -1,0 +1,58 @@
+# 내 앱을 GitHub Pages에 올리는 배포 파일 (바이브 코딩 특강 · AI Studio판)
+# 저장소에 .github/workflows/deploy.yml 이라는 이름으로 넣습니다.
+# main에 커밋할 때마다 앱의 화면 부분을 만들어(빌드) GitHub Pages에 올립니다.
+name: GitHub Pages 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 코드 가져오기
+        uses: actions/checkout@v6
+
+      - name: Node 준비
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: 패키지 설치
+        run: npm install --no-audit --no-fund --legacy-peer-deps
+
+      - name: 화면 만들기
+        run: |
+          if [ -f index.html ]; then
+            node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");fs.writeFileSync("index.html",s.replace(/<script type="importmap">[\s\S]*?<\/script>/,""))'
+          fi
+          npx vite build --base=./ --outDir "$GITHUB_WORKSPACE/pages-dist" --emptyOutDir
+          cp pages-dist/index.html pages-dist/404.html
+
+      - name: Pages 설정
+        uses: actions/configure-pages@v6
+
+      - name: 올릴 파일 묶기
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: pages-dist
+
+      - name: GitHub Pages에 올리기
+        id: deployment
+        uses: actions/deploy-pages@v5
+
