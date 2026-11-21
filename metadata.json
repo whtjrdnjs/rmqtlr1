@@ -1,0 +1,6 @@
+{
+  "name": "세종다정고 급식 - 우리 학교 오늘 식단",
+  "description": "세종다정고등학교 학생들을 위한 나이스(NEIS) 공식 연동 실시간 급식 식단표, 영양·칼로리 및 알레르기 맞춤 안내 앱",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
